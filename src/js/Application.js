@@ -1,7 +1,7 @@
 import EventEmitter from "eventemitter3";
 import image from "../images/planet.svg";
 
-const  _loading = document.getElementsByClassName("progress")[0]; 
+
 
 export default class Application extends EventEmitter {
   static get events() {
@@ -13,6 +13,8 @@ export default class Application extends EventEmitter {
   constructor() {
     super();
 
+    this._loading =document.getElementsByClassName("progress")[0]; 
+    
     this.urls = ["https://swapi.boom.dev/api/planets",
     "https://swapi.boom.dev/api/planets?page=2",
     "https://swapi.boom.dev/api/planets?page=3",
@@ -22,11 +24,12 @@ export default class Application extends EventEmitter {
     
     this.promise = this._load();
     
-
+console.log(this._loading.style.display);
     this.promise
-    .then(data=>this._create(data)).then(this._stopLoading);
+    .then(data=>this._create(data)).then(  this._stopLoading());
+ 
     
-    
+    console.log(this._loading);
     
 
     this.emit(Application.events.READY);
@@ -69,11 +72,14 @@ export default class Application extends EventEmitter {
       main.appendChild(box);
      }
     }
+   
   _startLoading(){
-    _loading.style.display = "block";
+    this._loading.style.display = "block";
+    
   }
+
   _stopLoading (){
-    _loading.style.display  = "none";
+    this._loading.style.display = "none";
   }
 
  async _load(){
