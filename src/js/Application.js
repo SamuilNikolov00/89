@@ -1,6 +1,8 @@
 import EventEmitter from "eventemitter3";
 import image from "../images/planet.svg";
 
+const  _loading = document.getElementsByClassName("progress")[0]; 
+
 export default class Application extends EventEmitter {
   static get events() {
     return {
@@ -11,15 +13,21 @@ export default class Application extends EventEmitter {
   constructor() {
     super();
 
-    const box = document.createElement("div");
-    box.classList.add("box");
-    box.innerHTML = this._render({
-      name: "Placeholder",
-      terrain: "placeholder",
-      population: 0,
-    });
+    this.urls = ["https://swapi.boom.dev/api/planets",
+    "https://swapi.boom.dev/api/planets?page=2",
+    "https://swapi.boom.dev/api/planets?page=3",
+    "https://swapi.boom.dev/api/planets?page=4",
+    "https://swapi.boom.dev/api/planets?page=5",
+    "https://swapi.boom.dev/api/planets?page=6"]
+    
+    this.promise = this._load();
+    
 
-    document.body.querySelector(".main").appendChild(box);
+    this.promise
+    .then(data=>this._create(data)).then(this._stopLoading);
+    
+    
+    
 
     this.emit(Application.events.READY);
   }
@@ -43,5 +51,37 @@ export default class Application extends EventEmitter {
   </div>
 </article>
     `;
+  }
+
+  async _create(data){
+    const main = document.getElementsByClassName("main")[0];
+    for(let x of data){
+    
+    
+      const box = document.createElement("div");
+      box.classList.add("box");
+      box.innerHTML = this._render({
+        name: x.name,
+        terrain: x.terrain,
+        population: x.population,
+      });
+
+      main.appendChild(box);
+     }
+    }
+  _startLoading(){
+    _loading.style.display = "block";
+  }
+  _stopLoading (){
+    _loading.style.display  = "none";
+  }
+
+ async _load(){
+  this._startLoading();
+  
+  const response = await Promise.all(
+    this.urls.map(url => fetch(url).then(res => res.json())));
+  
+   return response.map(x=>x.results).flat(1);
   }
 }
